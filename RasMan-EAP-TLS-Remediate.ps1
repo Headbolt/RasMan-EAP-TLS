@@ -25,9 +25,7 @@
 ###############################################################################################################
 #
 $SystemKey="HKLM:\SYSTEM\CurrentControlSet\Services\RasMan\PPP\EAP\13"
-#$SoftwareKeyPath="HKLM:\SOFTWARE\Policies\Microsoft\Windows"
-#$SoftwareKey="DeviceGuard"
-$Value="LsaCfgFlags"
+$Value="TlsVersion"
 $Data="4032"
 #
 ###############################################################################################################
