@@ -2,14 +2,13 @@
 #
 # ABOUT THIS PROGRAM
 #
-#   RasMan-EAP-TLS-Check.ps1
+#   CredGuard-Disable-Remediate.ps1
 #   https://github.com/Headbolt/RasMan-EAP-TLS
 #
-#  This script was designed to Check specific registry values
-#  and then exit with an appropriate Exit code.
+#  This script was designed to Remediate specific registry values
 #
-#  Intended use is in Microsoft Endpoint Manager, as the "Check" half of a Proactive Remediation Script
-#  The "Remediate" half is found here https://github.com/Headbolt/CredGuard-Disable
+#  Intended use is in Microsoft Endpoint Manager, as the "Remediate" half of a Proactive Remediation Script
+#  The "Check" half is found here https://github.com/Headbolt/RasMan-EAP-TLS
 #
 ###############################################################################################################
 #
@@ -26,6 +25,8 @@
 ###############################################################################################################
 #
 $SystemKey="HKLM:\SYSTEM\CurrentControlSet\Services\RasMan\PPP\EAP\13"
+#$SoftwareKeyPath="HKLM:\SOFTWARE\Policies\Microsoft\Windows"
+#$SoftwareKey="DeviceGuard"
 $Value="LsaCfgFlags"
 $Data="4032"
 #
@@ -39,13 +40,16 @@ $Data="4032"
 #
 ###############################################################################################################
 #
+Write-Host ""
 $SystemKeyCheck=(Get-Item $SystemKey).property # Grab values from key
 $SystemValueCheck=(select-string -pattern "\b$Value\b" -InputObject $SystemKeyCheck) # Grab desired value from key
 #
 if ([string]::IsNullOrEmpty($SystemValueCheck)) # Check value exists 
 {
 	Write-Host "$SystemKey\$Value Does not exist"
-	Exit 1 # Value does not exist, exit with failure code
+	Write-Host 'Running Command'
+	Write-Host "New-ItemProperty -Path $SystemKey -Name $Value -PropertyType DWORD -Value $Data | Out-Null"
+	New-ItemProperty -Path $SystemKey -Name $Value -PropertyType DWORD -Value $Data | Out-Null # Create value
 }
 else
 {
@@ -55,7 +59,8 @@ else
 	Write-Host "$SystemKey\$Value should be $Data and is $SystemDataCheck"
 	if ( $SystemDataCheck -ne $Data) # Check value data
 	{
-		Exit 1 # Value data is incorrect, exit with failure code 
+		Write-Host 'Running Command'
+		Write-Host "New-ItemProperty -Path $SystemKey -Name $Value -PropertyType DWORD -Value $Data -Force | Out-Null"
+		New-ItemProperty -Path $SystemKey -Name $Value -PropertyType DWORD -Value $Data -Force | Out-Null # Update value
 	}
 }
- Exit 0 # All value data is correct, exit with success code 
